@@ -1,16 +1,18 @@
-// controller actions
+// controller actions for all authenticated routes
 module.exports.signup_get = (req, res) => {
-  res.render('signup');
-}
+  res.render("signup");
+};
 
 module.exports.login_get = (req, res) => {
-  res.render('login');
-}
+  res.render("login");
+};
 
 module.exports.signup_post = async (req, res) => {
-  res.send('new signup');
-}
+  const { email, passwprd } = req.body;
+  res.send("user signup");
+};
 
 module.exports.login_post = async (req, res) => {
-  res.send('user login');
-}
+  const { email, passwprd } = req.body;
+  res.send("user login");
+};
