@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const User = require("../models/User.js");
 
 const requireAuth = (req, res, next) => {
   // extract token from cookie
@@ -23,4 +24,29 @@ const requireAuth = (req, res, next) => {
   }
 };
 
-module.exports = { requireAuth };
+// check current user
+const checkUser = (req, res, next) => {
+  const token = req.cookies.jwt;
+  if (token) {
+    jwt.verify(token, "myappsecret", async (err, decodedToken) => {
+      if (err) {
+        // handle errors
+        console.log(err.message);
+        res.locals.user = user; // set user on response.locals to null
+        next();
+      } else {
+        // handle success
+        // grab user._id from token payload:
+        let user = await User.findById(decodedToken.id);
+        res.locals.user = user; // set user onto response.locals
+        next();
+      }
+    });
+  } else {
+    // if token is invalid/user does not exist
+    res.locals.user = null; // nullify the user property on req.locals
+    next();
+  }
+};
+
+module.exports = { requireAuth, checkUser };

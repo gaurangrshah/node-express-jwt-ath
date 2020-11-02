@@ -84,3 +84,11 @@ module.exports.login_post = async (req, res) => {
     res.status(400).json(errors);
   }
 };
+
+module.exports.logout_get = (req, res) => {
+  // set cookie value to blank string and expires in 1sec
+  res.cookie("jwt", "", { maxAge: 1 });
+  // NOTE: there is no straightforward way to delete a cookie value,
+  // so instead we just nullify its value
+  res.redirect("/login"); // send user to login page on logout
+};
