@@ -11,6 +11,16 @@ const createToken = (id) => {
 
 const handleErrors = (err) => {
   let errors = { email: "", password: "" };
+
+  // incorrect email
+  if (err.message === "incorrect email") {
+    errors.email = "email not found";
+  }
+  // incorrect password
+  if (err.message === "incorrect password") {
+    errors.email = "password is incorrect";
+  }
+
   // duplicate error code
   if (err.code === 11000) {
     // duplicate email records will throw a 11000 error status code
@@ -63,9 +73,14 @@ module.exports.login_post = async (req, res) => {
     // call the static login method we defined on the user model:
     const user = await User.login(email, password);
 
+    // generate signed token:
+    const token = createToken(user._id);
+    // set token as cookie, and expiry value ===  3days (in milliseconds)
+    res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 });
+
     res.status(201).json({ user: user._id });
   } catch (err) {
-    console.log(err);
-    res.status(400).json({});
+    const errors = handleErrors(err);
+    res.status(400).json(errors);
   }
 };
