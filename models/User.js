@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const { isEmail } = require("validator");
-var bcrypt = require("bcrypt");
+const bcrypt = require("bcrypt");
 
 const userSchema = new mongoose.Schema({
   email: {
@@ -18,12 +18,6 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-// // fires "after" a doc saved to db
-// userSchema.post("save", function (doc, next) {
-//   console.log("new user was created", doc);
-//   next();
-// });
-
 // fires "before" doc saved to db
 userSchema.pre("save", async function (next) {
   // NOTE: runs before saving -- so no doc avialable yet
@@ -33,6 +27,24 @@ userSchema.pre("save", async function (next) {
   this.password = await bcrypt.hash(this.password, salt); // has current password with salt
   next();
 });
+
+// static user login method
+userSchema.statics.login = async function (email, password) {
+  // find the user from the User model who matches the submitted email
+  const user = await this.findOne({ email });
+  if (user) {
+    // compare the current submitted password to the hashed password from db
+    const auth = await bcrypt.compare(password, user.password);
+
+    if (auth) {
+      // if passwords match:
+      return user;
+    }
+    throw Error("incorrect password");
+  }
+
+  throw Error("incorrect email");
+};
 
 // the model must be in the "singular" form of of model name
 const User = mongoose.model("user", userSchema);

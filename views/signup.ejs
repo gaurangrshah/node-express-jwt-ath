@@ -3,7 +3,7 @@
 <form action="">
   <h2>Sign up</h2>
   <label for="email">Email</label>
-  <input type="email" name="email" required />
+  <input type="text" name="email" required />
   <div class="email error"></div>
   <label for="password">Password</label>
   <input type="password" name="password" required />
@@ -11,16 +11,45 @@
   <button>Sign up</button>
 </form>
 
+<%- include('partials/footer'); -%>
+
 <script>
   const form = document.querySelector("form");
-  form.addEventListener("submit", (e) => {
+  // grab a reference to the errors elements so we can render errors to DOM.
+  const emailError = document.querySelector(".email.error");
+  const passwordError = document.querySelector(".password.error");
+
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
+
+    // reset errors before submitting:
+    emailError.textContent = "";
+    passwordError.textContent = "";
 
     // get form input values
     const email = form.email.value;
     const password = form.password.value;
-    console.log(email, password);
+
+    try {
+      // construct request
+      const res = await fetch("/signup", {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const data = await res.json(); // parse response
+      if (data.email || data.password) {
+        // render errors
+        emailError.textContent = data.email;
+        passwordError.textContent = data.password;
+      }
+      if (data.user) {
+        location.assign("/"); // redirect to app root
+      }
+    } catch (err) {
+      // handle errors
+      console.log(err);
+    }
   });
 </script>
-
-<%- include('partials/footer'); -%>
