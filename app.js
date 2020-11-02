@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const authRoutes = require("./routes/authRoutes");
 const cookieParser = require("cookie-parser");
+const { requireAuth } = require("./middleware/authMiddleware");
 
 const app = express();
 
@@ -27,5 +28,6 @@ mongoose
 
 // register routes - routes
 app.get("/", (req, res) => res.render("home"));
-app.get("/smoothies", (req, res) => res.render("smoothies")); // controller
+// Add requireAuth middleware to restrict access to authenticated users only
+app.get("/smoothies", requireAuth, (req, res) => res.render("smoothies")); // controller
 app.use(authRoutes);
